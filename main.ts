@@ -31,4 +31,8 @@ for (const name of readdirSync(outDir)) {
 const entryPath = join(outDir, 'entry.txt');
 writeFileSync(entryPath, TEXT, 'utf8');
 chmodSync(entryPath, 0o644);
-chmodSync(outDir, 0o755);
+// Never chmod the output directory itself: in the grader /output is a
+// root-owned mounted volume and this program runs as uid 65534 (nobody),
+// so chmod on outDir throws EPERM and fails the whole run — even though
+// entry.txt was already written successfully by then. Only chmod
+// entry.txt, which this program creates and therefore owns.
